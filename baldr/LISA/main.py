@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from transformers import AutoTokenizer
 from config import PlusConfig
-
+import re
 from API.schemas import ChatData
 from load_model import load_model
 from API.utils.preproccess import prompt_preproccess, image_preproccess
@@ -43,8 +43,10 @@ def chat(data: ChatData):
     )
     output_ids = output_ids[0][output_ids[0] != IMAGE_TOKEN_INDEX]
 
-    text_output = tokenizer.decode(output_ids, skip_special_tokens=False)
-    text_output = text_output.replace("\n", "").replace("  ", " ")
+    text_output = tokenizer.decode(output_ids, skip_special_tokens=True)
+    # text_output = text_output.replace("\n", "").replace("  ", " ")
+    match = re.search(r'ASSISTANT:\s*(.*)', text_output, re.DOTALL)
+    assistant_response = match.group(1) if match else None
     print("text_output: ", text_output)
 
     print("len(pred_masks): ", len(pred_masks))
@@ -52,4 +54,4 @@ def chat(data: ChatData):
     
     visualize(config, pred_masks, data.image, image_np)
 
-    return {"message": data} 
+    return {"message": assistant_response} 
