@@ -30,7 +30,7 @@ import numpy as np
 
 from fastapi import FastAPI
 from API.schemas import ChatData
-from API.utils.preprocess import preprocess_masks, decode_base64_to_pil, pil_to_data_uri
+from API.utils.preprocess import preprocess_masks, decode_base64_uri_to_pil, pil_to_data_uri
 from API.utils.device import get_device 
 from API.utils.s3 import download_masks 
 
@@ -47,14 +47,14 @@ def home():
 
 @app.post("/inpaint")
 def chat(data: ChatData):
-    masks = download_masks(data.chat_id, data.user_id, data.image_name)
+    masks = download_masks(data.user_id, data.chat_id, data.image_name)
     result: Image = pipe(
         prompt=data.positive_prompt,
-        image=decode_base64_to_pil(data.original_image),
-        mask_image=masks,
+        image=decode_base64_uri_to_pil(data.original_image),
+        mask_image=preprocess_masks(masks),
         negative_prompt=data.negative_prompt,
     ).images[0]
     result.save("imgs/api_building_result.png")
     result_data_uri = pil_to_data_uri(result)
-    print(result)
+    print(result_data_uri, type(result_data_uri))
     return {"img": result_data_uri} 
