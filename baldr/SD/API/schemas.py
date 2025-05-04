@@ -3,12 +3,12 @@ from typing import Optional, List
 import base64
 
 class ChatData(BaseModel):
-    prompt: str
+    positive_prompt: str
     image: str
     user_id: str
     chat_id: str
     image_name: str
-    masks: List[str]  
+    masks: Optional[str] = None
     negative_prompt: Optional[str] = None
 
     @field_validator("image")

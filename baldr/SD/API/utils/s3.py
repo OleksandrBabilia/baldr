@@ -10,7 +10,7 @@ load_dotenv()
 
 s3 = boto3.client(
     's3',
-    endpoint_url='https://s3.wasabisys.com',
+    endpoint_url='https://s3.eu-central-2.wasabisys.com',  
     aws_access_key_id=os.getenv('WASABI_ACCESS_KEY'),
     aws_secret_access_key=os.getenv('WASABI_SECRET_KEY'),
 )

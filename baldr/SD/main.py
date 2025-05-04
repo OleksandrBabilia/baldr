@@ -49,7 +49,7 @@ def home():
 def chat(data: ChatData):
     masks = download_masks(data.chat_id, data.user_id, data.image_name)
     result: Image = pipe(
-        prompt=data.prompt,
+        prompt=data.positive_prompt,
         image=decode_base64_to_pil(data.image),
         mask_image=masks,
         negative_prompt=data.negative_prompt,
