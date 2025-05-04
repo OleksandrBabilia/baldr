@@ -4,9 +4,10 @@ from config import PlusConfig
 import re
 from API.schemas import ChatData
 from load_model import load_model
-from API.utils.preproccess import prompt_preproccess, image_preproccess
+from API.utils.preproccess import prompt_preproccess, image_preprocess
 from API.utils.visualize import visualize
 from utils.utils import IMAGE_TOKEN_INDEX
+from pprint import pprint
 
 config = PlusConfig()
 
@@ -31,7 +32,7 @@ def home():
 def chat(data: ChatData):
 
     prompt = prompt_preproccess(data.prompt, tokenizer)
-    image_clip, image, resize_list, original_size_list, image_np = image_preproccess(data.image)
+    image_clip, image, resize_list, original_size_list, image_np = image_preprocess(data.image)
     output_ids, pred_masks = model.evaluate(
         image_clip,
         image,
@@ -48,10 +49,13 @@ def chat(data: ChatData):
     match = re.search(r'ASSISTANT:\s*(.*)', text_output, re.DOTALL)
     assistant_response = match.group(1) if match else None
     print("text_output: ", text_output)
+    response = {"message": assistant_response}
 
     print("len(pred_masks): ", len(pred_masks))
-    print("[x.shape for x in pred_masks]: ", [x.shape for x in pred_masks])
+    if len(pred_masks) > 0:
+        print("[x.shape for x in pred_masks]: ", [x.shape for x in pred_masks])
+        img = visualize(config, pred_masks, data.image, image_np)
+        response["img"] = img
+        
     
-    visualize(config, pred_masks, data.image, image_np)
-
-    return {"message": assistant_response} 
+    return response
