@@ -27,4 +27,6 @@ payload = {
     "masks": [mask_base64]
 }
 response = response = requests.post("http://localhost:8000/inpaint", json=payload)
+with open("resp.txt", "w") as file:
+    file.write(response.text)
 print(response.status_code, response.text)

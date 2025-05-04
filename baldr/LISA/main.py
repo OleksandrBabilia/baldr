@@ -30,7 +30,6 @@ def home():
 
 @app.post("/chat")
 def chat(data: ChatData):
-
     prompt = prompt_preproccess(data.prompt, tokenizer)
     image_clip, image, resize_list, original_size_list, image_np = image_preprocess(data.image)
     output_ids, pred_masks = model.evaluate(
@@ -56,6 +55,5 @@ def chat(data: ChatData):
         print("[x.shape for x in pred_masks]: ", [x.shape for x in pred_masks])
         img = visualize(config, pred_masks, data.image, image_np)
         response["img"] = img
-        
-    
+   
     return response
