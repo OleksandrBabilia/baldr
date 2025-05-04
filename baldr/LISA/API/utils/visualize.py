@@ -48,17 +48,19 @@ def visualize(pred_masks, image_np, data_user_id, data_chat_id):
         pred_mask_np = pred_mask.detach().cpu().numpy()
         binary_mask = pred_mask_np > 0
 
-        save_img[binary_mask] = (
-            image_np * 0.5
-            + binary_mask[:, :, None].astype(np.uint8) * np.array(colormap_rgb[i % len(colormap_rgb)]) * 0.5
-        )[binary_mask]
+        overlay_color = np.array(colormap_rgb[i % len(colormap_rgb)])
+        blended = image_np * 0.5 + binary_mask[:, :, None] * overlay_color * 0.5
+        save_img = np.where(binary_mask[:, :, None], blended, save_img)
 
-        mask_img = (binary_mask * 255).astype(np.uint8) * 255
+        # Save mask
+        mask_img = (binary_mask.astype(np.uint8)) * 255
         mask_img = cv2.cvtColor(mask_img, cv2.COLOR_GRAY2BGR)
         _, mask_encoded = cv2.imencode('.jpg', mask_img)
         mask_key = f"{mask_folder_path}/{unique_id}_mask_{i+1}.jpg"
         s3.upload_fileobj(BytesIO(mask_encoded.tobytes()), BUCKET_NAME, mask_key)
 
+
+    save_img = np.clip(save_img, 0, 255).astype(np.uint8)
     save_img_bgr = cv2.cvtColor(save_img, cv2.COLOR_RGB2BGR)
     success, encoded_image = cv2.imencode('.jpg', save_img_bgr)
     if not success:
