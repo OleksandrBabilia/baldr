@@ -32,6 +32,7 @@ from fastapi import FastAPI
 from API.schemas import ChatData
 from API.utils.preprocess import preprocess_masks, decode_base64_to_pil, pil_to_data_uri
 from API.utils.device import get_device 
+from API.utils.s3 import download_masks 
 
 pipe = StableDiffusionXLInpaintPipeline.from_pretrained(
     "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
@@ -46,11 +47,11 @@ def home():
 
 @app.post("/inpaint")
 def chat(data: ChatData):
-    mask = preprocess_masks(data.masks)
+    masks = download_masks(data.chat_id, data.user_id, data.image_name)
     result: Image = pipe(
         prompt=data.prompt,
         image=decode_base64_to_pil(data.image),
-        mask_image=mask,
+        mask_image=masks,
         negative_prompt=data.negative_prompt,
     ).images[0]
     result.save("imgs/api_building_result.png")

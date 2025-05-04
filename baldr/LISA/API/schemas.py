@@ -4,6 +4,8 @@ import base64
 
 class ChatData(BaseModel):
     prompt: str
+    user_id: str
+    chat_id: str
     image: Optional[str] = None
     object: Optional[str] = None
 

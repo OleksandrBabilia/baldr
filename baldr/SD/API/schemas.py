@@ -5,6 +5,9 @@ import base64
 class ChatData(BaseModel):
     prompt: str
     image: str
+    user_id: str
+    chat_id: str
+    image_name: str
     masks: List[str]  
     negative_prompt: Optional[str] = None
 

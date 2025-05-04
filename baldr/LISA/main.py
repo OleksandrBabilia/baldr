@@ -53,7 +53,8 @@ def chat(data: ChatData):
     print("len(pred_masks): ", len(pred_masks))
     if len(pred_masks) > 0:
         print("[x.shape for x in pred_masks]: ", [x.shape for x in pred_masks])
-        img = visualize(config, pred_masks, data.image, image_np)
+        img, img_name = visualize(pred_masks, image_np, data.user_id, data.chat_id)
         response["img"] = img
+        response["img_name"] = img_name
    
     return response
