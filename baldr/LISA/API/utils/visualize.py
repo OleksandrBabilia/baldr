@@ -46,7 +46,19 @@ def visualize(pred_masks, image_np, data_user_id, data_chat_id):
             continue
 
         pred_mask_np = pred_mask.detach().cpu().numpy()
-        binary_mask = pred_mask_np > 0
+        binary_mask = (pred_mask_np > 0).astype(np.uint8) * 255
+
+        # Step 1: Morphological closing (fills small holes)
+        kernel = np.ones((100, 100), np.uint8)
+        closed_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+
+        # Step 2: Dilation (grow mask edges to absorb nearby small blobs)
+        dilated_mask = cv2.dilate(closed_mask, kernel, iterations=1)
+
+        # Optional Step 3: Erosion (to restore original-ish size)
+        cleaned_mask = cv2.erode(dilated_mask, kernel, iterations=1)
+
+        binary_mask = (cleaned_mask > 0).astype(bool)
 
         overlay_color = np.array(colormap_rgb[i % len(colormap_rgb)])
         blended = image_np * 0.5 + binary_mask[:, :, None] * overlay_color * 0.5

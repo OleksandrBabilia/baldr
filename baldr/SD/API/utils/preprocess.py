@@ -22,18 +22,21 @@ def pil_to_data_uri(image: Image, image_format="JPEG"):
 def preprocess_masks(mask_base64_list):
     if not mask_base64_list:
         raise ValueError("mask_list is empty")
-    print("Het we are on the preprocess_masks function")
-    base = decode_base64_to_pil(mask_base64_list[0])
-    base_array = np.array(base.convert("L"))
-    aggregate = np.where(base_array > 15, 255, 0).astype(np.uint8)
 
-    for mask_base64 in mask_base64_list[1:]:
-        mask = mask_base64
-        gray = mask.convert("L")
-        arr = np.array(gray)
+    def decode_and_binarize(base64_str):
+        image = decode_base64_to_pil(base64_str).convert("L")  # grayscale
+        image = image.resize((1024, 1024), Image.Resampling.BILINEAR)  # ensure smooth up/downscale
+        arr = np.array(image)
         binary = np.where(arr > 15, 255, 0).astype(np.uint8)
-        aggregate = np.maximum(aggregate, binary)  
+        return binary
 
-    processed_mask = Image.fromarray(aggregate)
-    print(type(processed_mask))
+    # Decode and binarize the first mask
+    aggregate = decode_and_binarize(mask_base64_list[0])
+
+    # Combine the rest
+    for mask_base64 in mask_base64_list[1:]:
+        binary = decode_and_binarize(mask_base64)
+        aggregate = np.maximum(aggregate, binary)
+
+    processed_mask = Image.fromarray(aggregate).convert("L")  # keep grayscale
     return processed_mask

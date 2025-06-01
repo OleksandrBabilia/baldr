@@ -53,6 +53,8 @@ def chat(data: ChatData):
         image=decode_base64_uri_to_pil(data.original_image),
         mask_image=preprocess_masks(masks),
         negative_prompt=data.negative_prompt,
+        guidance_scale=10.0,
+        num_inference_steps=100,
     ).images[0]
     result.save("imgs/api_building_result.png")
     result_data_uri = pil_to_data_uri(result)
